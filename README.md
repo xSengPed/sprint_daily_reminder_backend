@@ -2,12 +2,18 @@
 
 Express + TypeScript + MongoDB สำหรับเก็บ daily standup ของแต่ละ squad
 
+หน้าเว็บอยู่คนละ repo ชื่อ `daily_reminder` (Next.js) — ปกติ clone ไว้ข้างกัน
+เพราะ `docker-compose.yml` ของฝั่งนั้น build repo นี้จาก `../sprint_reminder_backend`
+
 ## เริ่มใช้งาน
 
 ```bash
 npm install
 npm run dev      # http://localhost:4000
 ```
+
+รันด้วย Docker ตัวเดียวโดด ๆ ก็ได้: `cp .env.example .env` แล้ว `docker compose up -d --build`
+(ถ้าจะ deploy ทั้งระบบพร้อม frontend ให้ใช้ compose ของ repo `daily_reminder` แทน)
 
 `npm start` จะ build ใหม่ให้ก่อนเสมอ (`prestart`) เพื่อไม่ให้รัน `dist/` เก่าที่ยังไม่มีโค้ดล่าสุด
 

@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    name: Typecheck + smoke test
+    runs-on: ubuntu-latest
+
+    # ยก MongoDB ชั่วคราวมาให้ ทดสอบได้ว่าเซิร์ฟเวอร์ boot และต่อ DB ได้จริง
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - run: npm run build
+
+      - name: Smoke test
+        env:
+          MONGODB_URI: mongodb://localhost:27017
+          MONGODB_DB: sprint_reminder_ci
+          PORT: "4000"
+        run: |
+          node dist/server.js &
+          SERVER_PID=$!
+          for _ in $(seq 1 20); do
+            if curl -fsS http://localhost:4000/api/health >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          echo "--- health ---"
+          curl -fsS http://localhost:4000/api/health
+          echo "--- วันหยุดต้องถูก seed จาก data/holidays.ics ---"
+          curl -fsS "http://localhost:4000/api/holidays?year=2026&type=public" |
+            grep -q '"date"' || { echo "seed วันหยุดไม่สำเร็จ"; exit 1; }
+          echo "--- บันทึก daily แล้วอ่านกลับ ---"
+          curl -fsS -X PUT http://localhost:4000/api/entries/zeny/2026-01-05 \
+            -H 'Content-Type: application/json' \
+            -d '{"yesterday":[],"today":[{"id":"t1","text":"ci","done":false}],"blockers":[],"note":""}' >/dev/null
+          curl -fsS http://localhost:4000/api/entries/zeny/2026-01-05 | grep -q '"ci"' \
+            || { echo "อ่านค่าที่บันทึกกลับมาไม่ได้"; exit 1; }
+          kill $SERVER_PID
+          echo "smoke test ผ่าน"

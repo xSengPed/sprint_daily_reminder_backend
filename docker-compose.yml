@@ -1,0 +1,21 @@
+# รัน API ตัวเดียวโดด ๆ (เช่นตอน dev ฝั่งเว็บด้วย npm run dev)
+# ถ้าจะ deploy ทั้งระบบพร้อม frontend ให้ใช้ docker-compose.yml ของ repo daily_reminder แทน
+services:
+  backend:
+    build:
+      context: .
+    ports:
+      - "${PORT:-4000}:4000"
+    environment:
+      NODE_ENV: production
+      PORT: "4000"
+      MONGODB_URI: ${MONGODB_URI:?ต้องตั้ง MONGODB_URI ในไฟล์ .env}
+      MONGODB_DB: ${MONGODB_DB:-sprint_reminder}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

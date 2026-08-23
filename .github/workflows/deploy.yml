@@ -1,0 +1,15 @@
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Proxmox
+    # runner เดียวกับของ repo frontend — สคริปต์ล็อกไว้ไม่ให้ deploy ชนกัน
+    runs-on: [self-hosted, daily-reminder]
+    steps:
+      - name: Pull + rebuild + health check
+        run: /opt/daily/deploy.sh
