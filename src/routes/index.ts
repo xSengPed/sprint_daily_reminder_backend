@@ -3,6 +3,8 @@ import { SQUADS } from "../config/squads";
 import { isMongoReady } from "../db/mongo";
 import { entriesRouter } from "./entries.routes";
 import { holidaysRouter } from "./holidays.routes";
+import { otRouter } from "./ot.routes";
+import { sprintRouter } from "./sprint.routes";
 
 export const apiRouter: Router = Router();
 
@@ -23,3 +25,5 @@ apiRouter.get("/squads", (_req, res) => {
 
 apiRouter.use("/entries", entriesRouter);
 apiRouter.use("/holidays", holidaysRouter);
+apiRouter.use("/ot", otRouter);
+apiRouter.use("/sprint", sprintRouter);
