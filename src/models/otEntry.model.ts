@@ -15,8 +15,10 @@ const otEntrySchema = new Schema(
     startTime: { type: String, required: true, match: [HHMM, "ต้องอยู่ในรูปแบบ HH:mm"] },
     endTime: { type: String, required: true, match: [HHMM, "ต้องอยู่ในรูปแบบ HH:mm"] },
     description: { type: String, default: "", trim: true },
-    /** ชั่วโมงที่คำนวณจาก start/end ตอนบันทึก เก็บไว้เลยไม่คำนวณสดทุกครั้ง */
+    /** ชั่วโมงจริงที่คำนวณจาก start/end ตอนบันทึก (ยังไม่คูณตัวคูณ) เก็บไว้เลยไม่คำนวณสดทุกครั้ง */
     hours: { type: Number, required: true, min: 0 },
+    /** ตัวคูณ OT — ชั่วโมงสะสมจริง = hours * multiplier */
+    multiplier: { type: Number, required: true, enum: [1, 1.5, 1.75], default: 1 },
   },
   {
     timestamps: true,
