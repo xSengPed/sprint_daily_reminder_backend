@@ -63,7 +63,7 @@ export async function createOtDeduction(req: Request, res: Response): Promise<vo
     OtEntry.find(),
     OtDeduction.find(),
   ]);
-  const totalDays = entries.reduce((sum, e) => sum + e.hours, 0) / 8;
+  const totalDays = entries.reduce((sum, e) => sum + e.hours * e.multiplier, 0) / 8;
   const usedDays = deductions.reduce((sum, d) => sum + d.days, 0);
   const remaining = totalDays - usedDays;
 
